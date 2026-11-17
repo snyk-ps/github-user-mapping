@@ -1,5 +1,5 @@
 # Copy this file to .github/workflows/snyk-access.yml in each repository.
-# Replace snyk-ps/github-user-mapping@v1 with the location of your copy of
+# Replace snyk-ps/github-user-mapping@v0.1.0 with the location of your copy of
 # this action.
 name: Snyk access
 
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: snyk-ps/github-user-mapping@v1
+      - uses: snyk-ps/github-user-mapping@v0.1.0
         with:
           mode: validate
 
@@ -36,7 +36,7 @@ jobs:
     environment: snyk-access
     steps:
       - uses: actions/checkout@v5
-      - uses: snyk-ps/github-user-mapping@v1
+      - uses: snyk-ps/github-user-mapping@v0.1.0
         with:
           mode: apply
           snyk-token: ${{ secrets.SNYK_ACCESS_TOKEN }}

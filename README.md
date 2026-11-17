@@ -122,7 +122,7 @@ Users must already exist in the Snyk Group. A user joins the Snyk Group when the
 
 ## Set up GitHub
 
-1. Copy this repository into your GitHub organization and tag a release, for example `v1`.
+1. Copy this repository into your GitHub organization and tag a release, for example `v0.1.0`.
 2. If the copy is private or internal, allow other repositories to use it. Navigate to **Settings** > **Actions** > **General** > **Access** in the copy and select the option that allows access from repositories in your organization.
 3. Add the following at the GitHub organization level, so that every repository inherits them:
 
@@ -139,7 +139,7 @@ Users must already exist in the Snyk Group. A user joins the Snyk Group when the
 
 1. Copy the files from `examples/.github/` into the `.github/` directory of the repository:
     - `snyk-access.yaml`: replace the example emails, and set or remove `organization.id`
-    - `workflows/snyk-access.yml`: replace `snyk-ps/github-user-mapping@v1` with your copy
+    - `workflows/snyk-access.yml`: replace `snyk-ps/github-user-mapping@v0.1.0` with your copy
     - `CODEOWNERS`: replace `@your-org/snyk-admins` with the team that approves Snyk access
 2. Protect the default branch with a branch protection rule or ruleset:
     - Require a pull request before merging.
