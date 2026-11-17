@@ -1,0 +1,6 @@
+# Changes to Snyk access and to the workflow that applies it need approval
+# from the security team. Turn on "Require review from Code Owners" in the
+# default branch's protection rule or ruleset for this to take effect.
+/.github/snyk-access.yaml        @your-org/snyk-admins
+/.github/workflows/snyk-access.yml @your-org/snyk-admins
+/.github/CODEOWNERS              @your-org/snyk-admins

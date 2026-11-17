@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/snyk-ps/github-user-mapping/main/schema/snyk-access.schema.json",
+  "title": "Snyk repository access file",
+  "description": "Declares who has access to the Snyk Organization a repository maps to. Lives at .github/snyk-access.yaml.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "org_admins"],
+  "properties": {
+    "version": {
+      "description": "Schema version of this file.",
+      "const": 1
+    },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Snyk Organization ID. When omitted, the Snyk Organization is resolved from the repository URL through the Asset Search API.",
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        }
+      }
+    },
+    "org_admins": {
+      "description": "Users who receive the Org Admin role.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/member" }
+    },
+    "users": {
+      "description": "Users who receive the developer role defined in the Snyk Group.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/member" }
+    }
+  },
+  "$defs": {
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["email"],
+      "properties": {
+        "email": {
+          "description": "Email address on the user's Snyk account.",
+          "type": "string",
+          "format": "email"
+        }
+      }
+    }
+  }
+}

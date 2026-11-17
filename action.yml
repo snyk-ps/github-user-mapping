@@ -1,0 +1,83 @@
+name: Snyk access sync
+description: >-
+  Adds the users listed in .github/snyk-access.yaml to the Snyk Organization
+  that the repository maps to, with fixed Org Admin and developer roles.
+
+inputs:
+  mode:
+    description: >-
+      validate checks the file only and needs no Snyk credentials.
+      dry-run resolves the Snyk Organization and users and reports what would change.
+      apply creates the missing Org Memberships. apply only runs from the default branch.
+    default: apply
+  access-file:
+    description: Path to the repository access file.
+    default: .github/snyk-access.yaml
+  snyk-token:
+    description: Snyk Group service account token. Required for dry-run and apply.
+    default: ""
+  group-id:
+    description: Snyk Group ID. Required for dry-run and apply.
+    default: ""
+  org-admin-role-id:
+    description: ID of the Org Admin role assigned to every entry in org_admins.
+    default: ""
+  developer-role-id:
+    description: ID of the developer role assigned to every entry in users.
+    default: ""
+  api-url:
+    description: Snyk API base URL. Change it for regional tenants, for example https://api.eu.snyk.io.
+    default: https://api.snyk.io
+  api-version:
+    description: Snyk REST API version.
+    default: "2025-11-05"
+  assets-api-version:
+    description: Snyk REST API version for Asset Search. Defaults to api-version.
+    default: ""
+  fail-on-unresolved:
+    description: Fail the run when an email has no matching user in the Snyk Group.
+    default: "false"
+
+outputs:
+  org-id:
+    description: Snyk Organization ID the memberships were applied to.
+    value: ${{ steps.sync.outputs.org-id }}
+  added-count:
+    description: Number of Org Memberships created.
+    value: ${{ steps.sync.outputs.added-count }}
+  failed-count:
+    description: Number of Org Memberships that could not be created.
+    value: ${{ steps.sync.outputs.failed-count }}
+  unresolved-count:
+    description: Number of emails with no matching user in the Snyk Group.
+    value: ${{ steps.sync.outputs.unresolved-count }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check required tools
+      shell: bash
+      run: |
+        for tool in yq jq curl; do
+          command -v "$tool" >/dev/null || { echo "::error::$tool is required on the runner."; exit 1; }
+        done
+        yq --version | grep -q mikefarah || { echo "::error::The mikefarah/yq (v4) build of yq is required."; exit 1; }
+
+    - name: Sync Snyk access
+      id: sync
+      shell: bash
+      run: '"$GITHUB_ACTION_PATH/scripts/snyk-access-sync.sh"'
+      env:
+        MODE: ${{ inputs.mode }}
+        ACCESS_FILE: ${{ inputs.access-file }}
+        SNYK_TOKEN: ${{ inputs.snyk-token }}
+        SNYK_GROUP_ID: ${{ inputs.group-id }}
+        SNYK_ORG_ADMIN_ROLE_ID: ${{ inputs.org-admin-role-id }}
+        SNYK_DEVELOPER_ROLE_ID: ${{ inputs.developer-role-id }}
+        SNYK_API_URL: ${{ inputs.api-url }}
+        SNYK_API_VERSION: ${{ inputs.api-version }}
+        SNYK_ASSETS_API_VERSION: ${{ inputs.assets-api-version || inputs.api-version }}
+        FAIL_ON_UNRESOLVED: ${{ inputs.fail-on-unresolved }}
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        GIT_REF: ${{ github.ref }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}

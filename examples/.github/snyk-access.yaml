@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/snyk-ps/github-user-mapping/main/schema/snyk-access.schema.json
+#
+# Declares who has access to the Snyk Organization this repository maps to.
+# Changes take effect after the pull request merges to the default branch.
+# Removing someone from this file does not remove them from Snyk.
+version: 1
+
+organization:
+  # Optional. When omitted, the GitHub Action resolves the
+  # Snyk Organization from the repository URL.
+  id: 00000000-0000-0000-0000-000000000000
+
+# Each entry receives the Org Admin role. At least one entry is required.
+org_admins:
+  - email: org.admin.one@example.com
+  - email: org.admin.two@example.com
+
+# Each entry receives the developer role defined in the Snyk Group.
+users:
+  - email: developer.one@example.com
+  - email: developer.two@example.com
+  - email: security.champion@example.com

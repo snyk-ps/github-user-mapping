@@ -1,0 +1,45 @@
+# Copy this file to .github/workflows/snyk-access.yml in each repository.
+# Replace snyk-ps/github-user-mapping@v1 with the location of your copy of
+# this action.
+name: Snyk access
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/snyk-access.yaml']
+  pull_request:
+    paths: ['.github/snyk-access.yaml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: snyk-access-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  # Pull requests only get the offline check, so no Snyk token is exposed to
+  # code that has not been reviewed.
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: snyk-ps/github-user-mapping@v1
+        with:
+          mode: validate
+
+  sync:
+    if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    environment: snyk-access
+    steps:
+      - uses: actions/checkout@v5
+      - uses: snyk-ps/github-user-mapping@v1
+        with:
+          mode: apply
+          snyk-token: ${{ secrets.SNYK_ACCESS_TOKEN }}
+          group-id: ${{ vars.SNYK_GROUP_ID }}
+          org-admin-role-id: ${{ vars.SNYK_ORG_ADMIN_ROLE_ID }}
+          developer-role-id: ${{ vars.SNYK_DEVELOPER_ROLE_ID }}
