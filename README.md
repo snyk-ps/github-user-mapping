@@ -195,8 +195,9 @@ The action retries a request up to three times on HTTP 429, server errors, and n
 - The action does not change the role of an existing member. A user listed in `org_admins` who is already a developer stays a developer, and the job summary reports it. An Org Admin must change the role in Snyk.
 - An email with no matching user in the Snyk Group is skipped and reported. Inviting the user is a candidate for a later phase. Set `fail-on-unresolved: true` to fail the run instead.
 - When several repositories map to the same Snyk Organization, the result is the union of their files, because the action only adds memberships. If two files list the same email with different roles, the first run to add the user wins. Assign one owning repository per Snyk Organization if this is a problem.
-- When a repository URL maps to more than one Snyk Organization, the run fails and asks for `organization.id`.
-- Asset Search (`POST /rest/groups/{group_id}/assets/search`) is an Early Access API. If it is not available in your Snyk Group, set `organization.id` in every file.
+- When a repository URL maps to more than one Snyk Organization, the run fails and asks for `organization.id`. This is common when a repository is imported into several Snyk Organizations, so set `organization.id` for those repositories.
+- When the repository asset exists but has no linked Snyk Organization, the repository was discovered but not imported. The run fails and asks you to import the repository or set `organization.id`.
+- Asset Search (`POST /rest/groups/{group_id}/assets/search`) is an Early Access API. It matches `repository_url` without regard to case, but does not match a `.git` suffix or trailing slash, so the action removes both before it searches. The search also returns `package` assets, which the action ignores. If Asset Search is not available in your Snyk Group, set `organization.id` in every file.
 
 ## Development
 

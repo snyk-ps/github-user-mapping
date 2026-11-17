@@ -253,16 +253,16 @@ def test_org_resolved_from_repository_url(tmp_path, snyk):
     snyk.state.assets = {REPO_URL: [ORG_ID]}
     path = write_access_file(tmp_path, NO_ORG)
 
-    result = run(path, tmp_path, snyk=snyk, REPO_URL=REPO_URL + ".git")
+    result = run(path, tmp_path, snyk=snyk, REPO_URL=REPO_URL.replace("example-org", "Example-Org") + ".git/")
 
     assert result.returncode == 0, result.stderr
     search = snyk.state.posts("/assets/search")[0]
     assert search["body"]["query"]["attributes"] == {
         "attribute": "repository_url",
         "operator": "equal",
-        "values": [REPO_URL],
+        "values": [REPO_URL.replace("example-org", "Example-Org")],
     }
-    assert (ORG_ID, "u-admin") in snyk.state.org_memberships
+    assert list(snyk.state.org_memberships) == [(ORG_ID, "u-admin")]
     assert "Asset Search" in result.summary
 
 

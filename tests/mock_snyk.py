@@ -30,6 +30,8 @@ class SnykState:
     org_memberships: dict = field(default_factory=dict)
     # repository url -> list of org ids
     assets: dict = field(default_factory=dict)
+    # orgs on the package asset that Asset Search returns next to each repository
+    package_orgs: list = field(default_factory=lambda: [OTHER_ORG_ID])
     # path regex -> status code to force
     failures: dict = field(default_factory=dict)
     requests: list = field(default_factory=list)
@@ -93,17 +95,20 @@ class MockSnyk:
 
                 m = re.fullmatch(r"/rest/groups/([^/]+)/assets/search", path)
                 if method == "POST" and m:
-                    url = body["query"]["attributes"]["values"][0]
+                    if int(query.get("limit", 10)) < 10:
+                        return self._send(400, {"errors": [{"detail": "limit cannot be less than: 10"}]})
+                    wanted = body["query"]["attributes"]["values"][0].lower()
                     data = [
                         {
-                            "id": "asset-1",
-                            "type": "repository",
+                            "id": f"asset-{i}",
+                            "type": asset_type,
                             "attributes": {"repository_url": url},
-                            "relationships": {
-                                "organizations": {"data": [{"id": o, "type": "org"} for o in state.assets.get(url, [])]}
-                            },
+                            "relationships": {"organizations": {"data": [{"id": o, "type": "org"} for o in orgs]}},
                         }
-                    ] if url in state.assets else []
+                        for i, (url, orgs) in enumerate(state.assets.items())
+                        if url.lower() == wanted
+                        for asset_type, orgs in [("repository", orgs), ("package", state.package_orgs)]
+                    ]
                     return self._send(200, {"data": data, "links": {}})
 
                 m = re.fullmatch(r"/rest/groups/([^/]+)/memberships", path)
